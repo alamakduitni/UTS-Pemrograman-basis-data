@@ -1,27 +1,4 @@
--- =======================================================================
--- DROP existing (safe)
--- =======================================================================
-DROP TABLE IF EXISTS Nilai CASCADE;
-DROP TABLE IF EXISTS Jenis_Nilai CASCADE;
-DROP TABLE IF EXISTS Presensi CASCADE;
-DROP TABLE IF EXISTS Siswa_Kelas CASCADE;
-DROP TABLE IF EXISTS Tahun_Ajaran CASCADE;
-DROP TABLE IF EXISTS Tarif CASCADE;
-DROP TABLE IF EXISTS Pembayaran CASCADE;
-DROP TABLE IF EXISTS Pendaftaran CASCADE;
-DROP TABLE IF EXISTS Staf_Tata_Usaha CASCADE;
-DROP TABLE IF EXISTS Ruang_Kelas CASCADE;
-DROP TABLE IF EXISTS Ruang CASCADE;
-DROP TABLE IF EXISTS Kelas CASCADE;
-DROP TABLE IF EXISTS Mapel CASCADE;
-DROP TABLE IF EXISTS Jurusan CASCADE;
-DROP TABLE IF EXISTS Jadwal CASCADE;
-DROP TABLE IF EXISTS Siswa CASCADE;
-DROP TABLE IF EXISTS Guru CASCADE;
 
--- =======================================================================
--- CREATE TABLES
--- =======================================================================
 CREATE TABLE Guru (
     nip VARCHAR(20) PRIMARY KEY,
     jenis_kelamin_guru VARCHAR(10),
@@ -165,7 +142,6 @@ CREATE INDEX idx_jadwal_mapel ON Jadwal(kode_mapel);
 CREATE INDEX idx_jadwal_guru ON Jadwal(nip_guru);
 
 -- =======================================================================
--- INSERT DUMMY (distribusi seimbang)
 -- - Referensi kecil: 10 rows each
 -- - Siswa: 10000 rows
 -- - Siswa_Kelas: 10000 (1 per siswa)
@@ -331,3 +307,4 @@ FROM generate_series(1,10000) AS s(i);
 
 -- Final: update stats recommendation
 -- After large INSERTS run: VACUUM ANALYZE;
+
