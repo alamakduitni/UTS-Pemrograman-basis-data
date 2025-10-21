@@ -157,7 +157,7 @@ SELECT 'J' || LPAD(i::text,2,'0'),
        (ARRAY['RPL','TKJ','MM','AKL','BD','AP','OT','PR','AG','BB'])[((i-1) % 10) + 1] || ' Dept'
 FROM generate_series(1,10) AS s(i);
 
--- 2) Mapel (10) - evenly link to jurusan
+-- 2) Mapel (10) - link ke jurusan
 INSERT INTO Mapel (kode_mapel, nama_mapel, kkm, kode_jurusan)
 SELECT
   'MP' || LPAD(i::text,3,'0'),
@@ -177,7 +177,7 @@ SELECT 'R' || LPAD(i::text,3,'0'),
        (ARRAY['Lab Komputer A','Lab Komputer B','Ruang Kelas 1','Ruang Kelas 2','Perpustakaan','Ruang Guru','Aula','Lab Fisika','Lab Kimia','Kantor TU'])[((i-1) % 10) + 1]
 FROM generate_series(1,10) AS s(i);
 
--- 5) Ruang_Kelas (10) map kelas->ruang randomly but balanced
+-- 5) Ruang_Kelas (10) map kelas->ruang random tapi teratur
 INSERT INTO Ruang_Kelas (id_kelas, kode_ruang, kapasitas)
 SELECT ((i - 1) % (SELECT COUNT(*) FROM Kelas)) + 1,
        (SELECT kode_ruang FROM Ruang ORDER BY random() LIMIT 1),
@@ -188,7 +188,7 @@ FROM generate_series(1,10) AS s(i);
 INSERT INTO Tahun_Ajaran (tahun_ajaran)
 SELECT (2016 + i)::text || '/' || (2017 + i)::text FROM generate_series(1,10) AS s(i);
 
--- 7) Guru (10 realistic names)
+-- 7) Guru (10)
 INSERT INTO Guru (nip, jenis_kelamin_guru, nama_guru, ttl, username, password)
 SELECT 'NIP' || LPAD(i::text,6,'0'),
        CASE WHEN (i % 2)=0 THEN 'L' ELSE 'P' END,
@@ -218,9 +218,7 @@ INSERT INTO Jenis_Nilai (nama_jenis_nilai)
 SELECT (ARRAY['UTS','UAS','Tugas','Praktikum','Kuis','Proyek','Remedial','Portofolio','Ulangan Harian','Presentasi'])[i]
 FROM generate_series(1,10) AS s(i);
 
--- =======================================================================
--- 11) Jadwal (100) -- distributes mapel/guru/ruang/tahun evenly
--- =======================================================================
+-- 11) Jadwal (100) -- distributes mapel/guru/ruang/tahun
 INSERT INTO Jadwal (jam_mulai, jam_selesai, semester, hari, nip_guru, kode_mapel, id_ruang_kelas, id_tahun_ajaran)
 SELECT
   (TIME '06:30' + ((i % 8) * INTERVAL '1 hour'))::time,
@@ -233,10 +231,7 @@ SELECT
   ((i - 1) % (SELECT COUNT(*) FROM Tahun_Ajaran)) + 1
 FROM generate_series(1,100) AS s(i);
 
--- =======================================================================
--- 12) SISWA (10.000) realistic names distributed
--- =======================================================================
--- arrays of first/last names used to craft varied realistic names
+-- 12) SISWA (10.000) 
 INSERT INTO Siswa (nisn, alamat, usia, hobi, nama_siswa, jenis_kelamin_siswa, agama_siswa, tanggal_lahir,
                    pekerjaan_ayah, pekerjaan_ibu, nama_ayah, nama_ibu, no_hp_ayah, no_hp_ibu)
 SELECT
@@ -260,7 +255,7 @@ SELECT
   '08' || LPAD(((i * 31) % 99999999)::text,10,'0') AS no_hp_ibu
 FROM generate_series(1,10000) AS s(i);
 
--- 13) Siswa_Kelas (10.000) - ensure every student assigned to a class & year
+-- 13) Siswa_Kelas (10.000) utk pastikan tiap siswa terdaftar ke kelas dan tahun ajaran
 INSERT INTO Siswa_Kelas (nisn, id_kelas, id_tahun_ajaran, tanggal_masuk)
 SELECT
   'NISN' || LPAD(i::text,6,'0'),
@@ -269,7 +264,7 @@ SELECT
   CURRENT_DATE - ((i % 400) + ((i % 30)))
 FROM generate_series(1,10000) AS s(i);
 
--- 14) Pembayaran (20.000) - evenly distributed across students/tarif/tahun/staf
+-- 14) Pembayaran (20.000) - distributed ke siswa/tarif/tahunAjaran/staf
 INSERT INTO Pembayaran (nisn, tanggal_pembayaran, id_karyawan, id_tarif, id_tahun_ajaran, jumlah_bayar)
 SELECT
   'NISN' || LPAD(((i % 10000) + 1)::text,6,'0'),
@@ -280,7 +275,7 @@ SELECT
   (( (i - 1) % 10 + 1) * 150000 )::NUMERIC(15,2)
 FROM generate_series(1,20000) AS s(i);
 
--- 15) Presensi (200.000) - spread across dates & statuses (20 per siswa)
+-- 15) Presensi (200.000) berdasarkan tanggal dan status (20 per siswa)
 INSERT INTO Presensi (id_siswa_kelas, tanggal_presensi, status_kehadiran)
 SELECT
   ((i - 1) % (SELECT COUNT(*) FROM Siswa_Kelas)) + 1,
@@ -288,7 +283,7 @@ SELECT
   (ARRAY['Hadir','Izin','Sakit','Alfa'])[((i-1) % 4) + 1]
 FROM generate_series(1,200000) AS s(i);
 
--- 16) Nilai (40.000) - each siswa_kelas receives multiple jenis nilai across mapel
+-- 16) Nilai (40.000) - setiap siswa_kelas ada banyak nilai untuk 1 mapel
 INSERT INTO Nilai (id_siswa_kelas, id_jenis_nilai, kode_mapel, nilai)
 SELECT
   ((i - 1) % (SELECT COUNT(*) FROM Siswa_Kelas)) + 1,
@@ -297,7 +292,7 @@ SELECT
   (ROUND((50 + (random() * 50))::numeric,2))::NUMERIC(5,2)
 FROM generate_series(1,40000) AS s(i);
 
--- 17) Pendaftaran (10.000) - one per siswa, processed by random staf (balanced)
+-- 17) Pendaftaran (10.000) - satu persiswa, didata sama staf tata usaha (random)
 INSERT INTO Pendaftaran (nisn, tanggal_pendaftaran, id_karyawan)
 SELECT
   'NISN' || LPAD(i::text,6,'0'),
@@ -305,6 +300,6 @@ SELECT
   ((i - 1) % (SELECT COUNT(*) FROM Staf_Tata_Usaha)) + 1
 FROM generate_series(1,10000) AS s(i);
 
--- Final: update stats recommendation
--- After large INSERTS run: VACUUM ANALYZE;
+
+
 
